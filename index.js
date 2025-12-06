@@ -1,8 +1,10 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const { TranslationServiceClient } = require('@google-cloud/translate');
 
 const app = express();
+app.use(cors()); // Enable Cross-Origin Resource Sharing
 app.use(express.json()); // Middleware to parse JSON bodies
 
 const PORT = process.env.PORT || 8080;
@@ -33,7 +35,6 @@ async function detectLanguage(text) {
     };
 
     const [response] = await translationClient.detectLanguage(request);
-    
     if (response.languages && response.languages.length > 0) {
       // The most likely language is the first one in the list.
       const languageCode = response.languages[0].languageCode;
@@ -75,10 +76,12 @@ async function translateText(text, targetLanguageCode) {
     return null;
   }
 }
-
+app.use(express.json());
 // --- API Endpoint ---
 app.post('/chat', async (req, res) => {
   const { message } = req.body;
+  const languages = ['am', 'en'];
+
 
   if (!message) {
     return res.status(400).send({ error: 'Message is required.' });
@@ -90,12 +93,18 @@ app.post('/chat', async (req, res) => {
   if (originalLanguage === null) {
     return res.status(500).send({ error: 'Failed to detect language. Please check server logs for details.' });
   }
+  if (!languages.includes(originalLanguage)) {
+    return res.status(400).send({ error: `Unsupported language: ${originalLanguage}` });
+  }
+
+  const target_language = originalLanguage === 'en' ? 'am' : 'en';
+
 
   // 3. If input is NOT English -> translate to English
   let messageForAI = message;
-  if (originalLanguage && originalLanguage !== 'en') {
-    messageForAI = await translateText(message, 'en');
-  }
+  // if (originalLanguage && originalLanguage !== 'en') {
+  const ai_response = await translateText(message, target_language);
+  // }
 
   // --- Placeholder for next steps ---
   // 4. Send `messageForAI` to the Gemini API or another AI model.
@@ -103,14 +112,14 @@ app.post('/chat', async (req, res) => {
   // 6. If originalLanguage was not 'en', translate the AI response back.
   // 7. Send the final, translated response to the user.
 
-  console.log(`Original Language: ${originalLanguage}`);
-  console.log(`Message for AI (in English): ${messageForAI}`);
+  // console.log(`Original Language: ${originalLanguage}`);
+  // console.log(`Message for AI (in English): ${messageForAI}`);
 
   // For now, we'll just echo back the processed message
   res.status(200).send({ 
     original_language: originalLanguage,
-    message_for_ai: messageForAI,
-    reply: `Processed message: "${messageForAI}"` // This will be replaced by the AI's response
+    // message_for_ai: messageForAI,
+    reply: ai_response
   });
 });
 
