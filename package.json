@@ -1,0 +1,28 @@
+{
+  "name": "gcp_hackathon",
+  "version": "1.0.0",
+  "description": "Bridging Language and Knowledge Gaps in Ethiopia",
+  "keywords": [
+    "AI",
+    "hackathon"
+  ],
+  "homepage": "https://github.com/yaredybk/GCP_hackathon#readme",
+  "bugs": {
+    "url": "https://github.com/yaredybk/GCP_hackathon/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yaredybk/GCP_hackathon.git"
+  },
+  "license": "ISC",
+  "author": "yared",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@google-cloud/dialogflow-cx": "^5.5.0",
+    "express": "^5.2.1"
+  }
+}
